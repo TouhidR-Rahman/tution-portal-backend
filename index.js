@@ -23,7 +23,7 @@ app.use(cookieParser());
 const corsOptions = {
   origin: [
     process.env.FRONTEND_URL || "http://localhost:5173",
-    "https://your-frontend-domain.vercel.app", // Add your actual frontend domain
+    "https://tution-portal-frontend.vercel.app", // Your actual frontend domain
     /\.vercel\.app$/, // Allow any vercel.app subdomain for testing
   ],
   credentials: true,
@@ -100,14 +100,29 @@ app.get("/api/debug/auth", (req, res) => {
     cookies: {
       token: cookieToken ? "Present" : "Missing",
       allCookies: Object.keys(req.cookies),
+      cookieValue: cookieToken ? `${cookieToken.substring(0, 20)}...` : null,
     },
     headers: {
       authorization: authHeader ? "Present" : "Missing",
       bearerToken: bearerToken ? "Present" : "Missing",
       origin: req.headers.origin,
       userAgent: req.headers["user-agent"],
+      allHeaders: Object.keys(req.headers),
     },
-    jwtSecret: process.env.JWT_SECRET ? "Set" : "Not Set",
+    environment: {
+      jwtSecret: process.env.JWT_SECRET ? "Set" : "Not Set",
+      nodeEnv: process.env.NODE_ENV || "development",
+      frontendUrl: process.env.FRONTEND_URL || "Not Set",
+    },
+  });
+});
+
+// Test route without authentication
+app.get("/api/test", (req, res) => {
+  res.json({
+    message: "API is working!",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || "development",
   });
 });
 

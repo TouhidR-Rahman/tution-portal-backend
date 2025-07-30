@@ -21,8 +21,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const corsOptions = {
-  origin: [process.env.FRONTEND_URL || "http://localhost:5173"],
+  origin: [
+    process.env.FRONTEND_URL || "http://localhost:5173",
+    "https://your-frontend-domain.vercel.app", // Add your actual frontend domain
+    /\.vercel\.app$/, // Allow any vercel.app subdomain for testing
+  ],
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+  exposedHeaders: ["Set-Cookie"],
 };
 
 app.use(cors(corsOptions));
@@ -78,6 +85,30 @@ app.get("/", async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   }
+});
+
+// Debug route to check authentication
+app.get("/api/debug/auth", (req, res) => {
+  const cookieToken = req.cookies.token;
+  const authHeader = req.headers.authorization;
+  const bearerToken =
+    authHeader && authHeader.startsWith("Bearer ")
+      ? authHeader.substring(7)
+      : null;
+
+  res.json({
+    cookies: {
+      token: cookieToken ? "Present" : "Missing",
+      allCookies: Object.keys(req.cookies),
+    },
+    headers: {
+      authorization: authHeader ? "Present" : "Missing",
+      bearerToken: bearerToken ? "Present" : "Missing",
+      origin: req.headers.origin,
+      userAgent: req.headers["user-agent"],
+    },
+    jwtSecret: process.env.JWT_SECRET ? "Set" : "Not Set",
+  });
 });
 
 // Error handling middleware (must be last)

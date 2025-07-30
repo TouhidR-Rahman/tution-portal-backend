@@ -2,6 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 import connectDB from "./utils/db.js";
 import userRoute from "./routes/user.route.js";
 import tutionCenterRoute from "./routes/tutionCenter.route.js";
@@ -38,7 +39,24 @@ app.use("/api/v1/rating", ratingRoute);
 app.use("/api/superadmin", superAdminRoute);
 
 app.get("/", (req, res) => {
-  res.send("Welcome to the Tution Portal API");
+  const dbStatus = mongoose.connection.readyState;
+  const dbStatusText = {
+    0: "Disconnected",
+    1: "Connected",
+    2: "Connecting",
+    3: "Disconnecting",
+  };
+
+  const isConnected = dbStatus === 1;
+
+  res.json({
+    message: "Welcome to the Tution Portal API",
+    database: {
+      status: dbStatusText[dbStatus] || "Unknown",
+      connected: isConnected,
+    },
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Error handling middleware (must be last)

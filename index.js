@@ -37,6 +37,10 @@ app.use("/api/tutor-opportunity", tutorOpportunityRoutes);
 app.use("/api/v1/rating", ratingRoute);
 app.use("/api/superadmin", superAdminRoute);
 
+app.get("/", (req, res) => {
+  res.send("Welcome to the Tution Portal API");
+});
+
 // Error handling middleware (must be last)
 app.use(errorHandler);
 
